@@ -97,7 +97,7 @@ router.post("/place-order", (req, res) => {
                     db.query("CALL CalculateOrderTotal(?, ?)", [orderId, orderType], (err) => {
                         if (err) {
                             console.error("Error calculating order total:", err);
-                            return res.status(500).json({ error: "Failed to calculate order total" });
+                            return res.status(500).json({ error: "Failed to calculate order total", details: err.message });
                         }
                         res.json({ message: "Order placed successfully", orderId });
                     });
