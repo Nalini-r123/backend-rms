@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
         let payment_status = "Success"; // Always successful for simulation
 
         // 🔍 Check if a payment already exists for this order
-        const checkQuery = `SELECT payment_time FROM PAYMENT WHERE order_no = ?`;
+        const checkQuery = `SELECT payment_time FROM payment WHERE order_no = ?`;
 
         db.query(checkQuery, [order_no], (err, results) => {
             if (err) {
@@ -51,7 +51,7 @@ router.post("/", async (req, res) => {
 
             // 💾 Insert payment if no existing record is found
             const insertQuery = `
-                INSERT INTO PAYMENT (order_no, payment_method, upi_id, payment_status)
+                INSERT INTO payment (order_no, payment_method, upi_id, payment_status)
                 VALUES (?, ?, ?, ?)
             `;
 

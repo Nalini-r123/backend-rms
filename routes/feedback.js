@@ -12,7 +12,7 @@ router.post("/rateOrder", (req, res) => {
     }
 
     // Check if order is completed
-    const orderSql = "SELECT * FROM ORDERS WHERE order_no = ? AND order_status = 'Completed'";
+    const orderSql = "SELECT * FROM orders WHERE order_no = ? AND order_status = 'Completed'";
     db.query(orderSql, [order_no], (err, orderResult) => {
         if (err) {
             console.error("Database error:", err);
@@ -24,7 +24,7 @@ router.post("/rateOrder", (req, res) => {
         }
 
         // Check if feedback already exists
-        const feedbackSql = "SELECT * FROM FEEDBACK WHERE order_no = ?";
+        const feedbackSql = "SELECT * FROM feedback WHERE order_no = ?";
         db.query(feedbackSql, [order_no], (err, feedbackResult) => {
             if (err) {
                 console.error("Database error:", err);
@@ -35,7 +35,7 @@ router.post("/rateOrder", (req, res) => {
                 return res.status(400).json({ error: "You have already rated this order. Ratings cannot be updated." });
             } else {
                 // Insert new rating if not rated yet
-                const insertRatingSql = "INSERT INTO FEEDBACK (order_no, stars) VALUES (?, ?)";
+                const insertRatingSql = "INSERT INTO feedback (order_no, stars) VALUES (?, ?)";
                 db.query(insertRatingSql, [order_no, stars], (err) => {
                     if (err) {
                         console.error("Database error:", err);

@@ -7,7 +7,7 @@ const router = express.Router();
  * Fetch All Orders
  */
 router.get("/fetch-all-orders", (req, res) => {
-    const sql = "SELECT * FROM ORDERS ORDER BY order_date DESC";
+    const sql = "SELECT * FROM orders ORDER BY order_date DESC";
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -22,16 +22,16 @@ router.get("/fetch-order-details/:orderId", (req, res) => {
     const { orderId } = req.params;
     const sql = `
         SELECT 
-            O.order_no, O.order_status, O.order_type, O.total_amount, O.order_date, OD.item_no, M.name, OD.quantity, M.price,
-            P.payment_id, P.payment_status, P.payment_method, P.payment_time, 
-            CASE WHEN P.payment_method = 'UPI' THEN P.upi_id ELSE NULL END AS upi_id, 
-            F.stars AS feedback_stars
-        FROM ORDERS O
-        JOIN ORDER_DETAILS OD ON O.order_no = OD.order_no
-        JOIN MENU M ON OD.item_no = M.item_no
-        LEFT JOIN PAYMENT P ON O.order_no = P.order_no  -- Include payment status
-        LEFT JOIN FEEDBACK F ON O.order_no = F.order_no -- Include feedback stars
-        WHERE O.order_no = ?`;
+            o.order_no, o.order_status, o.order_type, o.total_amount, o.order_date, od.item_no, m.name, od.quantity, m.price,
+            p.payment_id, p.payment_status, p.payment_method, p.payment_time, 
+            CASE WHEN p.payment_method = 'UPI' THEN p.upi_id ELSE NULL END AS upi_id, 
+            f.stars AS feedback_stars
+        FROM orders o
+        JOIN order_details od ON o.order_no = od.order_no
+        JOIN menu m ON od.item_no = m.item_no
+        LEFT JOIN payment p ON o.order_no = p.order_no  -- Include payment status
+        LEFT JOIN feedback f ON o.order_no = f.order_no -- Include feedback stars
+        WHERE o.order_no = ?`;
 
     db.query(sql, [orderId], (err, results) => {
         if (err) {
@@ -81,7 +81,7 @@ router.post("/place-order", (req, res) => {
             let insertPromises = cart.map(item => {
                 return new Promise((resolve, reject) => {
                     db.query(
-                        "INSERT INTO ORDER_DETAILS (order_no, item_no, quantity) VALUES (?, ?, ?)",
+                        "INSERT INTO order_details (order_no, item_no, quantity) VALUES (?, ?, ?)",
                         [orderId, item.item_no, item.quantity],
                         (err) => {
                             if (err) reject(err);
@@ -118,7 +118,7 @@ router.put("/confirm-order/:orderId", (req, res) => {
     const { orderId } = req.params;
 
     // Fetch current order details
-    const fetchOrderSql = "SELECT order_type, total_amount FROM ORDERS WHERE order_no = ?";
+    const fetchOrderSql = "SELECT order_type, total_amount FROM orders WHERE order_no = ?";
     db.query(fetchOrderSql, [orderId], (err, results) => {
         if (err) {
             console.error("Error fetching order details:", err);
@@ -138,7 +138,7 @@ router.put("/confirm-order/:orderId", (req, res) => {
         }
 
         // Update the total amount in the database on order confirmation
-        const updateOrderSql = "UPDATE ORDERS SET order_status = 'Confirmed', total_amount = ? WHERE order_no = ?";
+        const updateOrderSql = "UPDATE orders SET order_status = 'Confirmed', total_amount = ? WHERE order_no = ?";
         db.query(updateOrderSql, [updatedTotalAmount, orderId], (err, result) => {
             if (err) {
                 console.error("Error confirming order:", err);
@@ -161,7 +161,7 @@ router.put("/confirm-order/:orderId", (req, res) => {
  */
 router.put("/cancel-order/:orderId", (req, res) => {
     const { orderId } = req.params;
-    const sql = "UPDATE ORDERS SET order_status = 'Cancelled' WHERE order_no = ? AND order_status = 'Pending'";
+    const sql = "UPDATE orders SET order_status = 'Cancelled' WHERE order_no = ? AND order_status = 'Pending'";
 
     db.query(sql, [orderId], (err, result) => {
         if (err) {
@@ -177,7 +177,7 @@ router.put("/cancel-order/:orderId", (req, res) => {
 
 // Fetch All Pending Orders (For Menu Page)
 router.get("/fetch-pending-orders", (req, res) => {
-    const sql = "SELECT * FROM ORDERS WHERE order_status = 'Pending' ORDER BY order_date DESC";
+    const sql = "SELECT * FROM orders WHERE order_status = 'Pending' ORDER BY order_date DESC";
 
     db.query(sql, (err, results) => {
         if (err) {

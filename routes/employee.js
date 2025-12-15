@@ -5,7 +5,7 @@ const router = express.Router();
 
 // ✅ 1. Get All Employees
 router.get("/", (req, res) => {
-    const sql = "SELECT * FROM EMPLOYEE";
+    const sql = "SELECT * FROM employee";
     db.query(sql, (err, results) => {
         if (err) {
             console.error("Error fetching employees:", err);
@@ -23,7 +23,7 @@ router.post("/add", (req, res) => {
         return res.status(400).json({ message: "Name, phone, and role are required" });
     }
 
-    const sql = "INSERT INTO EMPLOYEE (name, phone, address, role, admin_id) VALUES (?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO employee (name, phone, address, role, admin_id) VALUES (?, ?, ?, ?, ?)";
     db.query(sql, [name, phone, address, role, admin_id], (err, result) => {
         if (err) {
             console.error("Error adding employee:", err);
@@ -42,7 +42,7 @@ router.put("/update/:id", (req, res) => {
         return res.status(400).json({ message: "Name, phone, and role are required" });
     }
 
-    const sql = "UPDATE EMPLOYEE SET name = ?, phone = ?, address = ?, role = ?, admin_id = ? WHERE employee_id = ?";
+    const sql = "UPDATE employee SET name = ?, phone = ?, address = ?, role = ?, admin_id = ? WHERE employee_id = ?";
     db.query(sql, [name, phone, address, role, admin_id, id], (err, result) => {
         if (err) {
             console.error("Error updating employee:", err);
@@ -55,7 +55,7 @@ router.put("/update/:id", (req, res) => {
 // ✅ 4. Delete Employee
 router.delete("/delete/:id", (req, res) => {
     const { id } = req.params;
-    const sql = "DELETE FROM EMPLOYEE WHERE employee_id = ?";
+    const sql = "DELETE FROM employee WHERE employee_id = ?";
     
     db.query(sql, [id], (err, result) => {
         if (err) {

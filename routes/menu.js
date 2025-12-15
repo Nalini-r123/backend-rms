@@ -8,7 +8,7 @@ router.post("/add", (req, res) => {
     const { name, description, price, menu_type, tags } = req.body;
     const admin_id = 1; // Assume admin_id is set (can be dynamic)
     // Step 1: Insert the menu item
-    const sql = "INSERT INTO MENU (name, description, price, menu_type, admin_id) VALUES (?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO menu (name, description, price, menu_type, admin_id) VALUES (?, ?, ?, ?, ?)";
     db.query(sql, [name, description, price, menu_type, admin_id], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Failed to add menu item" });
@@ -18,7 +18,7 @@ router.post("/add", (req, res) => {
 
         // Step 2: If tags are provided, insert them into MENU_TAGS
         if (tags && tags.length > 0) {
-            const tagSql = "INSERT INTO MENU_TAGS (item_no, tag) VALUES ?";
+            const tagSql = "INSERT INTO menu_tags (item_no, tag) VALUES ?";
             const tagValues = tags.map(tag => [itemId, tag]);
 
             db.query(tagSql, [tagValues], (err) => {
@@ -38,14 +38,14 @@ router.get("/", (req, res) => {
     const sql = `
         SELECT 
             menu_type, 
-            MENU.item_no, 
-            MENU.name, 
-            MENU.description, 
-            MENU.price, 
-            IFNULL(GROUP_CONCAT(MENU_TAGS.tag SEPARATOR ', '), '') AS tags
-        FROM MENU
-        LEFT JOIN MENU_TAGS ON MENU.item_no = MENU_TAGS.item_no
-        GROUP BY menu_type, MENU.item_no;
+            menu.item_no, 
+            menu.name, 
+            menu.description, 
+            menu.price, 
+            IFNULL(GROUP_CONCAT(menu_tags.tag SEPARATOR ', '), '') AS tags
+        FROM menu
+        LEFT JOIN menu_tags ON menu.item_no = menu_tags.item_no
+        GROUP BY menu_type, menu.item_no;
     `;
 
     db.query(sql, (err, results) => {
@@ -72,14 +72,14 @@ router.put("/update/:id", (req, res) => {
     const { id } = req.params;
 
     // Step 1: Update the menu item itself
-    const sql = "UPDATE MENU SET name=?, description=?, price=?, menu_type=? WHERE item_no=?";
+    const sql = "UPDATE menu SET name=?, description=?, price=?, menu_type=? WHERE item_no=?";
     db.query(sql, [name, description, price, menu_type, id], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Failed to update menu item" });
         }
 
         // Step 2: Remove existing tags for this menu item (optional)
-        const deleteTagsSql = "DELETE FROM MENU_TAGS WHERE item_no=?";
+        const deleteTagsSql = "DELETE FROM menu_tags WHERE item_no=?";
         db.query(deleteTagsSql, [id], (err) => {
             if (err) {
                 return res.status(500).json({ error: "Failed to delete old tags" });
@@ -87,7 +87,7 @@ router.put("/update/:id", (req, res) => {
 
             // Step 3: Add new tags if provided
             if (tags && tags.length > 0) {
-                const tagSql = "INSERT INTO MENU_TAGS (item_no, tag) VALUES ?";
+                const tagSql = "INSERT INTO menu_tags (item_no, tag) VALUES ?";
                 const tagValues = tags.map(tag => [id, tag]);
 
                 db.query(tagSql, [tagValues], (err) => {
@@ -108,7 +108,7 @@ router.delete("/delete/:id", (req, res) => {
     const { id } = req.params;
 
     // Step 1: Delete the menu item (tags will be deleted automatically due to ON DELETE CASCADE)
-    const sql = "DELETE FROM MENU WHERE item_no=?";
+    const sql = "DELETE FROM menu WHERE item_no=?";
     db.query(sql, [id], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Failed to delete menu item" });
