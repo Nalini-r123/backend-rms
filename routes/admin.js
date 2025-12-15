@@ -11,7 +11,7 @@ router.post("/login", (req, res) => {
         return res.status(400).json({ message: "Username and password required" });
     }
 
-    const sql = "SELECT * FROM ADMIN WHERE username = ? AND password = ?";
+    const sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
     db.query(sql, [username, password], (err, results) => {
         if (err) {
             console.error("Database error:", err);
