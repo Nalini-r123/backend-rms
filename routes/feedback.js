@@ -11,8 +11,12 @@ router.post("/rateOrder", (req, res) => {
         return res.status(400).json({ error: "Invalid input. Order number and rating between 1 and 5 are required." });
     }
 
-    // Check if order is completed
-    const orderSql = "SELECT * FROM orders WHERE order_no = ? AND order_status = 'Completed'";
+    // Check if order is completed or confirmed
+    const orderSql = `
+        SELECT * FROM orders
+        WHERE order_no = ?
+        AND order_status IN ('Confirmed', 'Completed')
+    `;
     db.query(orderSql, [order_no], (err, orderResult) => {
         if (err) {
             console.error("Database error:", err);
