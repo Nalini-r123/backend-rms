@@ -18,8 +18,13 @@ router.post("/", async (req, res) => {
 
         let payment_status = "Success"; // Always successful for simulation
 
+        // 🔍 LOG: Check DB connection
+        console.log("DB Host:", process.env.DB_HOST);
+        console.log("DB Name:", process.env.DB_NAME);
+
         // 🔍 Check if a payment already exists for this order
         const checkQuery = `SELECT payment_time FROM payment WHERE order_no = ?`;
+        console.log("CHECK QUERY:", checkQuery, [order_no]);
 
         db.query(checkQuery, [order_no], (err, results) => {
             if (err) {
@@ -45,7 +50,7 @@ router.post("/", async (req, res) => {
                     order_no,
                     payment_method,
                     payment_status: "Success",
-                    payment_time: formattedTime // Send existing payment time
+                    payment_time: formattedTime
                 });
             }
 
@@ -54,6 +59,7 @@ router.post("/", async (req, res) => {
                 INSERT INTO payment (order_no, payment_method, upi_id, payment_status)
                 VALUES (?, ?, ?, ?)
             `;
+            console.log("INSERT QUERY:", insertQuery, [order_no, payment_method, upi_id || null, payment_status]);
 
             db.query(insertQuery, [order_no, payment_method, upi_id || null, payment_status], (err) => {
                 if (err) {
@@ -87,7 +93,7 @@ router.post("/", async (req, res) => {
                         order_no,
                         payment_method,
                         payment_status,
-                        payment_time: formattedTime // Always return payment time
+                        payment_time: formattedTime
                     });
                 });
             });
